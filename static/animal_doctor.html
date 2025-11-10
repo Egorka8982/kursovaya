@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление врачами (ветеринарами)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-section, .list-section {
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← На главную</a>
+        <h1>Управление врачами</h1>
+
+        <div class="form-section">
+            <h2>Добавить/Обновить врача</h2>
+            <form id="doctorForm">
+                <input type="hidden" id="doctorId">
+                <div class="form-group">
+                    <label for="doctorName">ФИО врача:</label>
+                    <input type="text" id="doctorName" required>
+                </div>
+                <div class="form-group">
+                    <label for="specialization">Специализация:</label>
+                    <input type="text" id="specialization" required>
+                </div>
+                <div class="form-group">
+                    <label for="doctorPhone">Телефон:</label>
+                    <input type="text" id="doctorPhone" required>
+                </div>
+                <button type="submit">Сохранить</button>
+                <button type="button" onclick="clearForm()">Очистить</button>
+            </form>
+        </div>
+
+        <div class="list-section">
+            <h2>Список врачей</h2>
+            <table id="doctorsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ФИО</th>
+                        <th>Специализация</th>
+                        <th>Телефон</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="doctorsList">
+                    <!-- Данные будут загружены через JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadDoctors);
+
+        document.getElementById('doctorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveDoctor();
+        });
+
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/doctors/');
+                const doctors = await response.json();
+                displayDoctors(doctors);
+            } catch (error) {
+                console.error('Ошибка загрузки врачей:', error);
+            }
+        }
+
+        function displayDoctors(doctors) {
+            const tbody = document.getElementById('doctorsList');
+            tbody.innerHTML = '';
+
+            doctors.forEach(doctor => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${doctor.doctor_id}</td>
+                    <td>${doctor.doctor_name}</td>
+                    <td>${doctor.specialization}</td>
+                    <td>${doctor.doctor_phone}</td>
+                    <td>
+                        <button onclick="editDoctor(${doctor.doctor_id}, '${doctor.doctor_name}', '${doctor.specialization}', '${doctor.doctor_phone}')">Редактировать</button>
+                        <button onclick="deleteDoctor(${doctor.doctor_id})">Удалить</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function saveDoctor() {
+            const doctorId = document.getElementById('doctorId').value;
+            const doctorData = {
+                doctor_name: document.getElementById('doctorName').value,
+                specialization: document.getElementById('specialization').value,
+                doctor_phone: document.getElementById('doctorPhone').value
+            };
+
+            try {
+                const url = doctorId ? `/doctors/${doctorId}` : '/doctors/';
+                const method = doctorId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(doctorData)
+                });
+
+                if (response.ok) {
+                    clearForm();
+                    loadDoctors();
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения врача:', error);
+            }
+        }
+
+        function editDoctor(id, name, specialization, phone) {
+            document.getElementById('doctorId').value = id;
+            document.getElementById('doctorName').value = name;
+            document.getElementById('specialization').value = specialization;
+            document.getElementById('doctorPhone').value = phone;
+        }
+
+        async function deleteDoctor(id) {
+            if (confirm('Вы уверены, что хотите удалить этого врача?')) {
+                try {
+                    const response = await fetch(`/doctors/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        loadDoctors();
+                    }
+                } catch (error) {
+                    console.error('Ошибка удаления врача:', error);
+                }
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('doctorForm').reset();
+            document.getElementById('doctorId').value = '';
+        }
+    </script>
+</body>
+</html>

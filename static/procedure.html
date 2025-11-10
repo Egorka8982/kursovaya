@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление процедурами</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-section, .list-section {
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← На главную</a>
+        <h1>Управление процедурами</h1>
+
+        <div class="form-section">
+            <h2>Добавить/Обновить процедуру</h2>
+            <form id="procedureForm">
+                <input type="hidden" id="procedureId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clientId">Клиент:</label>
+                        <select id="clientId" required>
+                            <option value="">Выберите клиента</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="animalId">Животное:</label>
+                        <select id="animalId" required>
+                            <option value="">Выберите животное</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="doctorId">Врач:</label>
+                        <select id="doctorId" required>
+                            <option value="">Выберите врача</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="treatmentId">Вид лечения:</label>
+                        <select id="treatmentId" required>
+                            <option value="">Выберите лечение</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit">Сохранить</button>
+                <button type="button" onclick="clearForm()">Очистить</button>
+            </form>
+        </div>
+
+        <div class="list-section">
+            <h2>Список процедур</h2>
+            <table id="proceduresTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Клиент</th>
+                        <th>Животное</th>
+                        <th>Врач</th>
+                        <th>Лечение</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="proceduresList">
+                    <!-- Данные будут загружены через JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProcedures();
+            loadReferenceData();
+        });
+
+        document.getElementById('procedureForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveProcedure();
+        });
+
+        async function loadReferenceData() {
+            try {
+                // Загрузка клиентов
+                const clientsResponse = await fetch('/clients/');
+                const clients = await clientsResponse.json();
+                const clientSelect = document.getElementById('clientId');
+                clients.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.client_id;
+                    option.textContent = `${client.client_name} (${client.client_phone})`;
+                    clientSelect.appendChild(option);
+                });
+
+                // Загрузка животных
+                const animalsResponse = await fetch('/animals/');
+                const animals = await animalsResponse.json();
+                const animalSelect = document.getElementById('animalId');
+                animals.forEach(animal => {
+                    const option = document.createElement('option');
+                    option.value = animal.animal_id;
+                    option.textContent = `${animal.name} (${animal.animal_type})`;
+                    animalSelect.appendChild(option);
+                });
+
+                // Загрузка врачей
+                const doctorsResponse = await fetch('/doctors/');
+                const doctors = await doctorsResponse.json();
+                const doctorSelect = document.getElementById('doctorId');
+                doctors.forEach(doctor => {
+                    const option = document.createElement('option');
+                    option.value = doctor.doctor_id;
+                    option.textContent = `${doctor.doctor_name} (${doctor.specialization})`;
+                    doctorSelect.appendChild(option);
+                });
+
+                // Загрузка видов лечения
+                const treatmentsResponse = await fetch('/treatments/');
+                const treatments = await treatmentsResponse.json();
+                const treatmentSelect = document.getElementById('treatmentId');
+                treatments.forEach(treatment => {
+                    const option = document.createElement('option');
+                    option.value = treatment.treatment_id;
+                    option.textContent = treatment.treatment_name;
+                    treatmentSelect.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Ошибка загрузки справочных данных:', error);
+            }
+        }
+
+        async function loadProcedures() {
+            try {
+                const response = await fetch('/procedures/');
+                const procedures = await response.json();
+                displayProcedures(procedures);
+            } catch (error) {
+                console.error('Ошибка загрузки процедур:', error);
+            }
+        }
+
+        function displayProcedures(procedures) {
+            const tbody = document.getElementById('proceduresList');
+            tbody.innerHTML = '';
+
+            procedures.forEach(procedure => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${procedure.procedure_id}</td>
+                    <td>${procedure.client_name}</td>
+                    <td>${procedure.animal_name}</td>
+                    <td>${procedure.doctor_name}</td>
+                    <td>${procedure.treatment_name}</td>
+                    <td>
+                        <button onclick="editProcedure(${procedure.procedure_id}, ${procedure.client_id}, ${procedure.animal_id}, ${procedure.doctor_id}, ${procedure.treatment_id})">Редактировать</button>
+                        <button onclick="deleteProcedure(${procedure.procedure_id})">Удалить</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function saveProcedure() {
+            const procedureId = document.getElementById('procedureId').value;
+            const procedureData = {
+                client_id: parseInt(document.getElementById('clientId').value),
+                client_name: document.getElementById('clientId').selectedOptions[0].text.split(' (')[0],
+                animal_id: parseInt(document.getElementById('animalId').value),
+                animal_name: document.getElementById('animalId').selectedOptions[0].text.split(' (')[0],
+                doctor_id: parseInt(document.getElementById('doctorId').value),
+                doctor_name: document.getElementById('doctorId').selectedOptions[0].text.split(' (')[0],
+                treatment_id: parseInt(document.getElementById('treatmentId').value),
+                treatment_name: document.getElementById('treatmentId').selectedOptions[0].text
+            };
+
+            try {
+                const url = procedureId ? `/procedures/${procedureId}` : '/procedures/';
+                const method = procedureId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(procedureData)
+                });
+
+                if (response.ok) {
+                    clearForm();
+                    loadProcedures();
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения процедуры:', error);
+            }
+        }
+
+        function editProcedure(id, clientId, animalId, doctorId, treatmentId) {
+            document.getElementById('procedureId').value = id;
+            document.getElementById('clientId').value = clientId;
+            document.getElementById('animalId').value = animalId;
+            document.getElementById('doctorId').value = doctorId;
+            document.getElementById('treatmentId').value = treatmentId;
+        }
+
+        async function deleteProcedure(id) {
+            if (confirm('Вы уверены, что хотите удалить эту процедуру?')) {
+                try {
+                    const response = await fetch(`/procedures/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        loadProcedures();
+                    }
+                } catch (error) {
+                    console.error('Ошибка удаления процедуры:', error);
+                }
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('procedureForm').reset();
+            document.getElementById('procedureId').value = '';
+        }
+    </script>
+</body>
+</html>
