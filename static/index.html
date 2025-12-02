@@ -1,142 +1,110 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ветеринарная клиника — Главная</title>
-
-    <!-- Bootstrap 5 Dark -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
-    <style>
-        body {
-            background-color: #1e1e2f;
-            color: #e0e0e0;
-            font-family: "Segoe UI", sans-serif;
-        }
-
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: #2b2b3d;
-            padding-top: 40px;
-            padding-left: 20px;
-        }
-
-        .sidebar a {
-            display: block;
-            padding: 12px 20px;
-            margin-bottom: 8px;
-            color: #c5c5d6;
-            font-size: 1.05rem;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: 0.2s;
-        }
-
-        .sidebar a:hover {
-            background: #3a3a50;
-            color: #fff;
-        }
-
-        .sidebar .title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 25px;
-            padding-left: 5px;
-            color: #ffffff;
-        }
-
-        .content {
-            margin-left: 260px;
-            padding: 40px;
-        }
-
-        .card-dark {
-            background: #2b2b3d;
-            border: 1px solid #3d3d50;
-            color: #fff;
-        }
-
-        .card-dark:hover {
-            background: #32324a;
-            transition: 0.2s;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ветеринарная клиника — Главная</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/static/common.css" rel="stylesheet">
+  <style>
+    .sidebar {
+      width: 260px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: #2b2b3d;
+      padding-top: 40px;
+      padding-left: 20px;
+    }
+    .sidebar a {
+      display: block;
+      padding: 12px 20px;
+      margin-bottom: 8px;
+      color: #c5c5d6;
+      font-size: 1.05rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+    .sidebar a:hover {
+      background: #3a3a50;
+      color: #fff;
+    }
+    .sidebar .title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 25px;
+      padding-left: 5px;
+      color: #ffffff;
+    }
+    .content {
+      margin-left: 260px;
+      padding: 40px;
+    }
+    .card-dark:hover {
+      background: #32324a;
+      transition: 0.2s;
+    }
+  </style>
 </head>
 <body>
+  <div class="sidebar">
+    <div class="title">ВетКлиника</div>
+    <a href="/client"><i class="bi bi-people"></i> Клиенты</a>
+    <a href="/animal"><i class="bi bi-bug"></i> Животные</a>
+    <a href="/doctor"><i class="bi bi-person-workspace"></i> Врачи</a>
+    <a href="/treatment"><i class="bi bi-heart-pulse"></i> Лечение</a>
+    <a href="/procedure"><i class="bi bi-tools"></i> Процедуры</a>
+  </div>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <div class="title">ВетКлиника</div>
+  <div class="content">
+    <h1 class="mb-4">Добро пожаловать в систему управления ветеринарной клиникой</h1>
+    <p class="text-secondary mb-5">Выберите раздел слева для начала работы.</p>
 
-        <a href="/static/client.html"><i class="bi bi-people"></i> Клиенты</a>
-        <a href="/static/animal.html"><i class="bi bi-bug"></i> Животные</a>
-        <a href="/static/animal_doctor.html"><i class="bi bi-person-workspace"></i> Врачи</a>
-        <a href="/static/treatment.html"><i class="bi bi-heart-pulse"></i> Лечение</a>
-        <a href="/static/procedure.html"><i class="bi bi-tools"></i> Процедуры</a>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <a href="/client" style="text-decoration:none;">
+          <div class="card card-dark p-4">
+            <h4><i class="bi bi-people"></i> Клиенты</h4>
+            <p class="text-secondary">Управление базой клиентов.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="/animal" style="text-decoration:none;">
+          <div class="card card-dark p-4">
+            <h4><i class="bi bi-bug"></i> Животные</h4>
+            <p class="text-secondary">Информация о питомцах.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="/doctor" style="text-decoration:none;">
+          <div class="card card-dark p-4">
+            <h4><i class="bi bi-person-workspace"></i> Врачи</h4>
+            <p class="text-secondary">Список и данные ветеринаров.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="/treatment" style="text-decoration:none;">
+          <div class="card card-dark p-4">
+            <h4><i class="bi bi-heart-pulse"></i> Лечение</h4>
+            <p class="text-secondary">История лечения животных.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="/procedure" style="text-decoration:none;">
+          <div class="card card-dark p-4">
+            <h4><i class="bi bi-tools"></i> Процедуры</h4>
+            <p class="text-secondary">Услуги и процедуры.</p>
+          </div>
+        </a>
+      </div>
     </div>
-
-    <!-- MAIN CONTENT -->
-    <div class="content">
-        <h1 class="mb-4">Добро пожаловать в систему управления ветеринарной клиникой</h1>
-        <p class="text-secondary mb-5">Выберите раздел слева для начала работы.</p>
-
-        <div class="row g-4">
-
-            <div class="col-md-4">
-                <a href="/static/client.html" style="text-decoration:none;">
-                    <div class="card card-dark p-4">
-                        <h4><i class="bi bi-people"></i> Клиенты</h4>
-                        <p class="text-secondary">Управление базой клиентов.</p>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-4">
-                <a href="/static/animal.html" style="text-decoration:none;">
-                    <div class="card card-dark p-4">
-                        <h4><i class="bi bi-bug"></i> Животные</h4>
-                        <p class="text-secondary">Информация о питомцах.</p>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-4">
-                <a href="/static/animal_doctor.html" style="text-decoration:none;">
-                    <div class="card card-dark p-4">
-                        <h4><i class="bi bi-person-workspace"></i> Врачи</h4>
-                        <p class="text-secondary">Список и данные ветеринаров.</p>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-4">
-                <a href="/static/treatment.html" style="text-decoration:none;">
-                    <div class="card card-dark p-4">
-                        <h4><i class="bi bi-heart-pulse"></i> Лечение</h4>
-                        <p class="text-secondary">История лечения животных.</p>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-4">
-                <a href="/static/procedure.html" style="text-decoration:none;">
-                    <div class="card card-dark p-4">
-                        <h4><i class="bi bi-tools"></i> Процедуры</h4>
-                        <p class="text-secondary">Услуги и процедуры.</p>
-                    </div>
-                </a>
-            </div>
-
-        </div>
-    </div>
-
+  </div>
 </body>
 </html>

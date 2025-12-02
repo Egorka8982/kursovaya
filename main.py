@@ -2,18 +2,18 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 import os
-from db_con import Base, engine
+import uvicorn
 
-from api import client_router, animal_router, doctor_router, procedure_router, treatment_router
+from app.core.config import settings
+from app.core.database import Base, engine
+from app.routers import clients, animals, doctors, treatments, procedures
 
 app = FastAPI(
-    title="Veterinary Service API",
-    description="API for managing veterinary clinic operations",
-    version="1.0.0"
+    title=settings.APP_TITLE,
+    description=settings.APP_DESCRIPTION,
+    version=settings.APP_VERSION
 )
-
 
 # Создаём таблицы
 Base.metadata.create_all(bind=engine)
@@ -21,7 +21,7 @@ Base.metadata.create_all(bind=engine)
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,11 +34,11 @@ os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Подключаем API роуты
-app.include_router(client_router)
-app.include_router(animal_router)
-app.include_router(doctor_router)
-app.include_router(procedure_router)
-app.include_router(treatment_router)
+app.include_router(clients.router)
+app.include_router(animals.router)
+app.include_router(doctors.router)
+app.include_router(treatments.router)
+app.include_router(procedures.router)
 
 # ---------------------------
 # HTML страницы
@@ -91,3 +91,4 @@ if __name__ == "__main__":
         port=8007,
         reload=True
     )
+

@@ -1,29 +1,26 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Животные — VetPanel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    body { background:#07080b; color:#eaf4ff; font-family: Inter, system-ui, Arial; }
-    .card-dark { background:#0d1117; border:1px solid rgba(255,255,255,0.04); }
-    .muted { color:#9aa4b2; }
-  </style>
+  <link href="/static/common.css" rel="stylesheet">
 </head>
 <body>
   <div class="container py-4">
-    <a href="index.html" class="btn btn-sm btn-outline-light mb-3"><i class="bi bi-arrow-left"></i> Назад</a>
+    <a href="/" class="btn btn-sm btn-outline-light mb-3"><i class="bi bi-arrow-left"></i> Назад</a>
 
     <div class="d-flex align-items-center justify-content-between mb-3">
       <h2 class="m-0">Животные</h2>
       <div>
-        <button class="btn btn-primary me-2" onclick="openCreateAnimal()"><i class="bi bi-plus"></i> Добавить</button>
-        <button class="btn btn-outline-light" onclick="loadAnimals()"><i class="bi bi-arrow-clockwise"></i> Обновить</button>
+        <button class="btn btn-primary me-2" onclick="openCreate()"><i class="bi bi-plus"></i> Добавить</button>
+        <button class="btn btn-outline-light" onclick="load()"><i class="bi bi-arrow-clockwise"></i> Обновить</button>
       </div>
     </div>
 
-    <div class="card card-dark shadow-sm mb-4">
+    <div class="card card-dark shadow-sm">
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-dark table-hover mb-0">
@@ -37,7 +34,7 @@
                 <th style="width:170px">Действия</th>
               </tr>
             </thead>
-            <tbody id="animalsTable"></tbody>
+            <tbody id="tableBody"></tbody>
           </table>
         </div>
       </div>
@@ -45,30 +42,30 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="animalModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-      <form class="modal-content card-dark text-light" id="animalForm">
+      <form class="modal-content card-dark text-light" id="form" onsubmit="handleSubmit(event)">
         <div class="modal-header border-0">
-          <h5 class="modal-title" id="animalModalTitle">Добавить животное</h5>
+          <h5 class="modal-title" id="modalTitle">Добавить животное</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <input type="hidden" id="animalId">
+          <input type="hidden" id="id">
           <div class="mb-2">
             <label class="form-label">Вид</label>
-            <input id="animalType" class="form-control bg-transparent text-light" required>
+            <input id="animal_type" class="form-control bg-transparent text-light" required>
           </div>
           <div class="mb-2">
             <label class="form-label">Порода</label>
-            <input id="animalBreed" class="form-control bg-transparent text-light" required>
+            <input id="breed" class="form-control bg-transparent text-light" required>
           </div>
           <div class="mb-2">
             <label class="form-label">Кличка</label>
-            <input id="animalName" class="form-control bg-transparent text-light" required>
+            <input id="name" class="form-control bg-transparent text-light" required>
           </div>
           <div class="mb-2">
             <label class="form-label">Диагноз</label>
-            <textarea id="animalDiagnosis" class="form-control bg-transparent text-light" rows="3"></textarea>
+            <textarea id="diagnosis" class="form-control bg-transparent text-light" rows="3"></textarea>
           </div>
         </div>
         <div class="modal-footer border-0">
@@ -79,92 +76,74 @@
     </div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-const API = '/animals/';
-const animalsTable = document.getElementById('animalsTable');
-const bsAnimalModal = new bootstrap.Modal(document.getElementById('animalModal'));
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/common.js"></script>
+  <script>
+    const API = '/animals/';
+    const tableBody = document.getElementById('tableBody');
+    const modal = new bootstrap.Modal(document.getElementById('modal'));
+    const fields = ['animal_type', 'breed', 'name', 'diagnosis'];
 
-function esc(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-function jsString(s){ return JSON.stringify(String(s||'')); }
-
-function rowAnimal(a){
-  return `<tr>
-    <td>${a.animal_id}</td>
-    <td>${esc(a.animal_type)}</td>
-    <td>${esc(a.breed)}</td>
-    <td>${esc(a.name)}</td>
-    <td>${esc(a.diagnosis)}</td>
-    <td>
-      <button class="btn btn-sm btn-outline-light me-2" onclick="openEditAnimal(${a.animal_id}, ${jsString(a.animal_type)}, ${jsString(a.breed)}, ${jsString(a.name)}, ${jsString(a.diagnosis)})"><i class="bi bi-pencil"></i> Ред.</button>
-      <button class="btn btn-sm btn-danger" onclick="deleteAnimal(${a.animal_id})"><i class="bi bi-trash"></i> Удалить</button>
-    </td>
-  </tr>`;
-}
-
-async function loadAnimals(){
-  try {
-    const r = await fetch(API);
-    const data = await r.json();
-    animalsTable.innerHTML = data.map(rowAnimal).join('') || '<tr><td colspan="6" class="text-muted p-3">Пусто</td></tr>';
-  } catch(e){ console.error(e); animalsTable.innerHTML = '<tr><td colspan="6" class="text-muted p-3">Ошибка загрузки</td></tr>'; }
-}
-
-function openCreateAnimal(){
-  document.getElementById('animalModalTitle').innerText = 'Добавить животное';
-  document.getElementById('animalId').value = '';
-  document.getElementById('animalType').value = '';
-  document.getElementById('animalBreed').value = '';
-  document.getElementById('animalName').value = '';
-  document.getElementById('animalDiagnosis').value = '';
-  bsAnimalModal.show();
-}
-
-function openEditAnimal(id, type, breed, name, diagnosis){
-  document.getElementById('animalModalTitle').innerText = 'Редактировать #' + id;
-  document.getElementById('animalId').value = id;
-  document.getElementById('animalType').value = type;
-  document.getElementById('animalBreed').value = breed;
-  document.getElementById('animalName').value = name;
-  document.getElementById('animalDiagnosis').value = diagnosis;
-  bsAnimalModal.show();
-}
-
-document.getElementById('animalForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const id = document.getElementById('animalId').value;
-  const payload = {
-    animal_type: document.getElementById('animalType').value,
-    breed: document.getElementById('animalBreed').value,
-    name: document.getElementById('animalName').value,
-    diagnosis: document.getElementById('animalDiagnosis').value
-  };
-
-  try {
-    if (id) {
-      const put = await fetch(API + id, { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      if (put.ok) { bsAnimalModal.hide(); loadAnimals(); return; }
-      // fallback
-      console.warn('PUT failed -> fallback delete+post');
-      await fetch(API + id, { method: 'DELETE' });
-      await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      bsAnimalModal.hide(); loadAnimals();
-    } else {
-      const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      if (r.ok) { bsAnimalModal.hide(); loadAnimals(); } else alert('Ошибка создания');
+    function rowHTML(item) {
+      return `<tr>
+        <td>${item.animal_id}</td>
+        <td>${esc(item.animal_type)}</td>
+        <td>${esc(item.breed)}</td>
+        <td>${esc(item.name)}</td>
+        <td>${esc(item.diagnosis || '')}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-light me-2" onclick="openEdit(${item.animal_id})">
+            <i class="bi bi-pencil"></i> Ред.
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.animal_id})">
+            <i class="bi bi-trash"></i> Удалить
+          </button>
+        </td>
+      </tr>`;
     }
-  } catch(err){ console.error(err); alert('Ошибка сети'); }
-});
 
-async function deleteAnimal(id){
-  if (!confirm('Удалить животное #' + id + '?')) return;
-  try {
-    const r = await fetch(API + id, { method: 'DELETE' });
-    if (r.ok) loadAnimals(); else alert('Ошибка удаления');
-  } catch(e){ console.error(e); alert('Ошибка сети'); }
-}
+    async function load() {
+      try {
+        const data = await apiRequest(API);
+        tableBody.innerHTML = data.map(rowHTML).join('') || 
+          '<tr><td colspan="6" class="text-muted p-3">Пусто</td></tr>';
+      } catch (e) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-muted p-3">Ошибка загрузки</td></tr>';
+      }
+    }
 
-loadAnimals();
-</script>
+    function openCreate() {
+      document.getElementById('modalTitle').innerText = 'Добавить животное';
+      document.getElementById('id').value = '';
+      fields.forEach(f => document.getElementById(f).value = '');
+      modal.show();
+    }
+
+    async function openEdit(id) {
+      try {
+        const item = await apiRequest(API + id);
+        document.getElementById('modalTitle').innerText = `Редактировать #${id}`;
+        document.getElementById('id').value = id;
+        fields.forEach(f => document.getElementById(f).value = item[f] || '');
+        modal.show();
+      } catch (e) {
+        alert('Ошибка загрузки');
+      }
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('id').value;
+      const data = {};
+      fields.forEach(f => data[f] = document.getElementById(f).value);
+      await saveEntity(API, id, data, modal, load);
+    }
+
+    async function deleteItem(id) {
+      await deleteEntity(API, id, 'животное', load);
+    }
+
+    load();
+  </script>
 </body>
 </html>

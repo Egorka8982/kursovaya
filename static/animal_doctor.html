@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Врачи — VetPanel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <style> body{background:#07080b;color:#eaf4ff;font-family:Inter,system-ui,Arial} .card-dark{background:#0d1117;border:1px solid rgba(255,255,255,0.04)} </style>
+  <link href="/static/common.css" rel="stylesheet">
 </head>
 <body>
   <div class="container py-4">
-    <a href="index.html" class="btn btn-sm btn-outline-light mb-3"><i class="bi bi-arrow-left"></i> Назад</a>
+    <a href="/" class="btn btn-sm btn-outline-light mb-3"><i class="bi bi-arrow-left"></i> Назад</a>
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="m-0">Врачи</h2>
-      <button class="btn btn-primary" onclick="openCreateDoctor()"><i class="bi bi-plus"></i> Добавить</button>
+      <button class="btn btn-primary" onclick="openCreate()"><i class="bi bi-plus"></i> Добавить</button>
     </div>
 
     <div class="card card-dark">
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-dark table-hover mb-0">
-            <thead><tr><th style="width:80px">ID</th><th>ФИО</th><th>Специализация</th><th>Телефон</th><th style="width:170px">Действия</th></tr></thead>
-            <tbody id="doctorsTable"></tbody>
+            <thead>
+              <tr>
+                <th style="width:80px">ID</th>
+                <th>ФИО</th>
+                <th>Специализация</th>
+                <th>Телефон</th>
+                <th style="width:170px">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
           </table>
         </div>
       </div>
@@ -28,87 +37,103 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="doctorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-      <form class="modal-content card-dark text-light" id="doctorForm">
-        <div class="modal-header border-0"><h5 id="doctorModalTitle">Добавить врача</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body">
-          <input type="hidden" id="doctorId">
-          <div class="mb-2"><label class="form-label">ФИО</label><input id="doctorName" class="form-control bg-transparent text-light" required></div>
-          <div class="mb-2"><label class="form-label">Специализация</label><input id="doctorSpec" class="form-control bg-transparent text-light" required></div>
-          <div class="mb-2"><label class="form-label">Телефон</label><input id="doctorPhone" class="form-control bg-transparent text-light" required></div>
+      <form class="modal-content card-dark text-light" id="form" onsubmit="handleSubmit(event)">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="modalTitle">Добавить врача</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-footer border-0"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button><button type="submit" class="btn btn-primary">Сохранить</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="id">
+          <div class="mb-2">
+            <label class="form-label">ФИО</label>
+            <input id="doctor_name" class="form-control bg-transparent text-light" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Специализация</label>
+            <input id="specialization" class="form-control bg-transparent text-light" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Телефон</label>
+            <input id="doctor_phone" class="form-control bg-transparent text-light" required>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
       </form>
     </div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-const API = '/doctors/';
-const doctorsTable = document.getElementById('doctorsTable');
-const bsDoctorModal = new bootstrap.Modal(document.getElementById('doctorModal'));
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/common.js"></script>
+  <script>
+    const API = '/doctors/';
+    const tableBody = document.getElementById('tableBody');
+    const modal = new bootstrap.Modal(document.getElementById('modal'));
+    const fields = ['doctor_name', 'specialization', 'doctor_phone'];
 
-function esc(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;'); }
-function jsString(s){ return JSON.stringify(String(s||'')); }
-
-function rowDoc(d){
-  return `<tr>
-    <td>${d.doctor_id}</td>
-    <td>${esc(d.doctor_name)}</td>
-    <td>${esc(d.specialization)}</td>
-    <td>${esc(d.doctor_phone)}</td>
-    <td>
-      <button class="btn btn-sm btn-outline-light me-2" onclick="openEditDoctor(${d.doctor_id}, ${jsString(d.doctor_name)}, ${jsString(d.specialization)}, ${jsString(d.doctor_phone)})"><i class="bi bi-pencil"></i> Ред.</button>
-      <button class="btn btn-sm btn-danger" onclick="deleteDoctor(${d.doctor_id})"><i class="bi bi-trash"></i> Удалить</button>
-    </td>
-  </tr>`;
-}
-
-async function loadDoctors(){ try { const r=await fetch(API); const data=await r.json(); doctorsTable.innerHTML = data.map(rowDoc).join('') || '<tr><td colspan="5" class="text-muted p-3">Пусто</td></tr>'; } catch(e){ console.error(e); doctorsTable.innerHTML = '<tr><td colspan="5" class="text-muted p-3">Ошибка</td></tr>'; } }
-
-function openCreateDoctor(){
-  document.getElementById('doctorModalTitle').innerText = 'Добавить врача';
-  document.getElementById('doctorId').value = '';
-  document.getElementById('doctorName').value = '';
-  document.getElementById('doctorSpec').value = '';
-  document.getElementById('doctorPhone').value = '';
-  bsDoctorModal.show();
-}
-
-function openEditDoctor(id, name, spec, phone){
-  document.getElementById('doctorModalTitle').innerText = 'Редактировать #' + id;
-  document.getElementById('doctorId').value = id;
-  document.getElementById('doctorName').value = name;
-  document.getElementById('doctorSpec').value = spec;
-  document.getElementById('doctorPhone').value = phone;
-  bsDoctorModal.show();
-}
-
-document.getElementById('doctorForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const id = document.getElementById('doctorId').value;
-  const payload = { doctor_name: document.getElementById('doctorName').value, specialization: document.getElementById('doctorSpec').value, doctor_phone: document.getElementById('doctorPhone').value };
-  try {
-    if (id) {
-      const put = await fetch(API + id, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      if (put.ok) { bsDoctorModal.hide(); loadDoctors(); return; }
-      await fetch(API + id, { method:'DELETE' });
-      await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      bsDoctorModal.hide(); loadDoctors();
-    } else {
-      const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      if (r.ok) { bsDoctorModal.hide(); loadDoctors(); } else alert('Ошибка');
+    function rowHTML(item) {
+      return `<tr>
+        <td>${item.doctor_id}</td>
+        <td>${esc(item.doctor_name)}</td>
+        <td>${esc(item.specialization || '')}</td>
+        <td>${esc(item.doctor_phone)}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-light me-2" onclick="openEdit(${item.doctor_id})">
+            <i class="bi bi-pencil"></i> Ред.
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.doctor_id})">
+            <i class="bi bi-trash"></i> Удалить
+          </button>
+        </td>
+      </tr>`;
     }
-  } catch(e){ console.error(e); alert('Ошибка сети'); }
-});
 
-async function deleteDoctor(id){
-  if (!confirm('Удалить врача #' + id + '?')) return;
-  try { const r = await fetch(API + id, { method:'DELETE' }); if (r.ok) loadDoctors(); else alert('Ошибка'); } catch(e){ console.error(e); alert('Ошибка сети'); }
-}
+    async function load() {
+      try {
+        const data = await apiRequest(API);
+        tableBody.innerHTML = data.map(rowHTML).join('') || 
+          '<tr><td colspan="5" class="text-muted p-3">Пусто</td></tr>';
+      } catch (e) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-muted p-3">Ошибка загрузки</td></tr>';
+      }
+    }
 
-loadDoctors();
-</script>
+    function openCreate() {
+      document.getElementById('modalTitle').innerText = 'Добавить врача';
+      document.getElementById('id').value = '';
+      fields.forEach(f => document.getElementById(f).value = '');
+      modal.show();
+    }
+
+    async function openEdit(id) {
+      try {
+        const item = await apiRequest(API + id);
+        document.getElementById('modalTitle').innerText = `Редактировать #${id}`;
+        document.getElementById('id').value = id;
+        fields.forEach(f => document.getElementById(f).value = item[f] || '');
+        modal.show();
+      } catch (e) {
+        alert('Ошибка загрузки');
+      }
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('id').value;
+      const data = {};
+      fields.forEach(f => data[f] = document.getElementById(f).value);
+      await saveEntity(API, id, data, modal, load);
+    }
+
+    async function deleteItem(id) {
+      await deleteEntity(API, id, 'врача', load);
+    }
+
+    load();
+  </script>
 </body>
 </html>

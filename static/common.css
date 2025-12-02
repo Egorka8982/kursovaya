@@ -1,0 +1,42 @@
+/* Общие стили для всех страниц */
+body {
+  background: #07080b;
+  color: #eaf4ff;
+  font-family: Inter, system-ui, Arial;
+  min-height: 100vh;
+}
+
+.card-dark {
+  background: #0d1117;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: #eaf4ff;
+}
+
+.muted {
+  color: #9aa4b2;
+}
+
+.table-dark {
+  --bs-table-bg: #0d1117;
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+  color: #eaf4ff;
+}
+
+.form-control.bg-transparent,
+.form-select.bg-transparent {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #eaf4ff !important;
+}
+
+.form-control.bg-transparent:focus,
+.form-select.bg-transparent:focus {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: #0d6efd;
+  color: #eaf4ff !important;
+}
+
+.btn-close-white {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
