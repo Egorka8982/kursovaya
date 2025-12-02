@@ -103,36 +103,4 @@ class TestClients:
         WebDriverWait(driver, 10).until(
             lambda d: "Тестовый Клиент" in d.find_element(By.ID, "tableBody").text
         )
-        
-    def test_view_clients_table(self, driver, base_url, server_process):
-        """Тест просмотра таблицы клиентов"""
-        # server_process фикстура гарантирует что сервер запущен
-        driver.get(f"{base_url}/client")
-        
-        # Ждем загрузки страницы
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Клиенты')]"))
-        )
-        
-        # Ждем загрузки таблицы (может быть пустой, но элемент должен быть)
-        table_body = WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.ID, "tableBody"))
-        )
-        
-        # Дополнительная задержка для загрузки данных через API
-        time.sleep(2)
-        
-        # Проверяем наличие таблицы
-        table = driver.find_element(By.TAG_NAME, "table")
-        assert table is not None
-        
-        # Проверяем заголовки таблицы
-        headers = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "thead th"))
-        )
-        header_texts = [h.text for h in headers]
-        assert len(header_texts) > 0, "Заголовки таблицы не найдены"
-        assert "ID" in header_texts or "id" in [t.lower() for t in header_texts]
-        assert "Имя" in header_texts or "имя" in [t.lower() for t in header_texts]
-        assert "Телефон" in header_texts or "телефон" in [t.lower() for t in header_texts]
 

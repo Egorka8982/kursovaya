@@ -48,21 +48,60 @@ def server_process():
         )
     
     # Ждем пока сервер запустится (проверяем доступность)
-    max_attempts = 30
+    max_attempts = 40  # Увеличиваем количество попыток
     import urllib.request
+    import urllib.error
+    
     for attempt in range(max_attempts):
+        # Проверяем что процесс еще работает
+        return_code = process.poll()
+        if return_code is not None:
+            # Процесс завершился - получаем ошибки
+            try:
+                stdout, stderr = process.communicate(timeout=2)
+            except:
+                stdout, stderr = b"", b""
+            
+            error_msg = f"\n{'='*60}\n"
+            error_msg += f"СЕРВЕР НЕ ЗАПУСТИЛСЯ (код выхода: {return_code})\n"
+            error_msg += f"{'='*60}\n"
+            
+            if stderr:
+                stderr_text = stderr.decode('utf-8', errors='ignore')
+                error_msg += f"\nОШИБКИ СЕРВЕРА:\n{stderr_text[:2000]}\n"
+            
+            if stdout:
+                stdout_text = stdout.decode('utf-8', errors='ignore')
+                error_msg += f"\nВЫВОД СЕРВЕРА:\n{stdout_text[:1000]}\n"
+            
+            error_msg += f"\n{'='*60}\n"
+            error_msg += f"ЧТО ДЕЛАТЬ:\n"
+            error_msg += f"1. Проверьте зависимости: pip install -r requirements.txt\n"
+            error_msg += f"2. Запустите сервер вручную: python main.py\n"
+            error_msg += f"3. Проверьте порт: netstat -ano | findstr :8007\n"
+            error_msg += f"4. Запустите отладку: python tests/debug_server.py\n"
+            error_msg += f"5. Проверьте что виртуальное окружение активировано\n"
+            error_msg += f"{'='*60}\n"
+            
+            raise Exception(error_msg)
+        
+        # Проверяем доступность сервера
         try:
-            # Проверяем что процесс еще работает
-            return_code = process.poll()
-            if return_code is not None:
-                # Процесс завершился - получаем ошибки
+            urllib.request.urlopen("http://localhost:8007/health", timeout=2)
+            # Дополнительная задержка чтобы сервер точно был готов
+            time.sleep(0.5)
+            break  # Сервер готов!
+        except (urllib.error.URLError, ConnectionRefusedError, OSError):
+            # Сервер еще не готов, продолжаем ждать
+            if attempt == max_attempts - 1:
+                # Последняя попытка - выводим подробные ошибки
                 try:
-                    stdout, stderr = process.communicate(timeout=2)
+                    stdout, stderr = process.communicate(timeout=1)
                 except:
                     stdout, stderr = b"", b""
                 
                 error_msg = f"\n{'='*60}\n"
-                error_msg += f"СЕРВЕР НЕ ЗАПУСТИЛСЯ (код выхода: {return_code})\n"
+                error_msg += f"СЕРВЕР НЕ ЗАПУСТИЛСЯ ЗА {max_attempts * 0.5} СЕКУНД\n"
                 error_msg += f"{'='*60}\n"
                 
                 if stderr:
@@ -75,46 +114,17 @@ def server_process():
                 
                 error_msg += f"\n{'='*60}\n"
                 error_msg += f"ЧТО ДЕЛАТЬ:\n"
-                error_msg += f"1. Проверьте зависимости: pip install -r requirements.txt\n"
-                error_msg += f"2. Запустите сервер вручную: python main.py\n"
-                error_msg += f"3. Проверьте порт: netstat -ano | findstr :8007\n"
-                error_msg += f"4. Запустите отладку: python tests/debug_server.py\n"
+                error_msg += f"1. Убедитесь что виртуальное окружение активировано\n"
+                error_msg += f"2. Установите зависимости: pip install -r requirements.txt\n"
+                error_msg += f"3. Проверьте порт 8007: netstat -ano | findstr :8007\n"
+                error_msg += f"4. Запустите сервер вручную: python main.py\n"
+                error_msg += f"5. Запустите отладку: python tests/debug_server.py\n"
                 error_msg += f"{'='*60}\n"
                 
                 raise Exception(error_msg)
-            
-            # Проверяем доступность сервера
-            try:
-                urllib.request.urlopen("http://localhost:8007/health", timeout=1)
-                # Дополнительная задержка чтобы сервер точно был готов
-                time.sleep(0.5)
-                break
-            except urllib.error.URLError:
-                # Сервер еще не готов, продолжаем ждать
-                pass
-        except urllib.error.URLError:
-            # Сервер еще не готов, продолжаем ждать
-            if attempt == max_attempts - 1:
-                # Выводим ошибки сервера если не запустился
-                try:
-                    stdout, stderr = process.communicate(timeout=1)
-                except:
-                    stdout, stderr = b"", b""
-                error_msg = f"Сервер не запустился за {max_attempts * 0.5} секунд.\n"
-                if stderr:
-                    error_msg += f"Ошибки сервера: {stderr.decode('utf-8', errors='ignore')[:1000]}\n"
-                if stdout:
-                    error_msg += f"Вывод сервера: {stdout.decode('utf-8', errors='ignore')[:500]}\n"
-                error_msg += f"Убедитесь, что:\n"
-                error_msg += f"1. Все зависимости установлены: pip install -r requirements.txt\n"
-                error_msg += f"2. Порт 8007 свободен\n"
-                error_msg += f"3. Приложение запускается вручную: python main.py"
-                raise Exception(error_msg)
-            time.sleep(0.5)
-        except Exception as e:
-            if attempt == max_attempts - 1:
-                raise Exception(f"Ошибка при проверке сервера: {e}")
-            time.sleep(0.5)
+        
+        # Ждем перед следующей попыткой
+        time.sleep(0.5)
     
     yield process
     
