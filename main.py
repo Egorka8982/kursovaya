@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.templating import Jinja2Templates
-from fastapi import Request
 import uvicorn
 import os
+from db_con import Base, engine
+
 from api import client_router, animal_router, doctor_router, procedure_router, treatment_router
 
 app = FastAPI(
@@ -14,7 +14,11 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Настройка CORS
+
+# Создаём таблицы
+Base.metadata.create_all(bind=engine)
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,78 +27,62 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Создаем папки если их нет
-os.makedirs("static", exist_ok=True)
+# Папка static
 os.makedirs("static", exist_ok=True)
 
-# Подключаем статические файлы
+# Подключаем static
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Подключаем все роутеры API
+# Подключаем API роуты
 app.include_router(client_router)
 app.include_router(animal_router)
 app.include_router(doctor_router)
 app.include_router(procedure_router)
 app.include_router(treatment_router)
 
+# ---------------------------
 # HTML страницы
+# ---------------------------
+
 @app.get("/", response_class=HTMLResponse)
-async def read_root():
-    """Главная страница"""
-    try:
-        return FileResponse('static/index.html')
-    except FileNotFoundError:
-        return HTMLResponse("<h1>Главная страница</h1><p>HTML файл не найден</p>")
+async def index_page():
+    return FileResponse("static/index.html")
 
-@app.get("static/client", response_class=HTMLResponse)
-async def clients_page():
-    """Страница управления клиентами"""
-    try:
-        return FileResponse('static/client.html')
-    except FileNotFoundError:
-        return HTMLResponse("<h1>Клиенты</h1><p>HTML файл не найден</p>")
 
-@app.get("static/animal", response_class=HTMLResponse)
-async def animals_page():
-    """Страница управления животными"""
-    try:
-        return FileResponse('static/animal.html')
-    except FileNotFoundError:
-        return HTMLResponse("<h1>Животные</h1><p>HTML файл не найден</p>")
+@app.get("/client", response_class=HTMLResponse)
+async def client_page():
+    return FileResponse("static/client.html")
 
-@app.get("static/doctors-page", response_class=HTMLResponse)
-async def doctors_page():
-    """Страница управления врачами"""
-    try:
-        return FileResponse('static/animal_doctor.html')
-    except FileNotFoundError:
-        return HTMLResponse("<h1>Врачи</h1><p>HTML файл не найден</p>")
 
-@app.get("static/treatments-page", response_class=HTMLResponse)
-async def treatments_page():
-    """Страница управления видами лечения"""
-    try:
-        return FileResponse('static/treatment.html')
-    except FileNotFoundError:
-        return HTMLResponse("<h1>Виды лечения</h1><p>HTML файл не найден</p>")
+@app.get("/animal", response_class=HTMLResponse)
+async def animal_page():
+    return FileResponse("static/animal.html")
 
-@app.get("static/procedures-page", response_class=HTMLResponse)
-async def procedures_page():
-    """Страница управления процедурами"""
-    try:
-        return FileResponse('static/procedure.html')
-    except FileNotFoundError:
-        return HTMLResponse("<h1>Процедуры</h1><p>HTML файл не найден</p>")
+
+@app.get("/doctor", response_class=HTMLResponse)
+async def doctor_page():
+    return FileResponse("static/animal_doctor.html")
+
+
+@app.get("/treatment", response_class=HTMLResponse)
+async def treatment_page():
+    return FileResponse("static/treatment.html")
+
+
+@app.get("/procedure", response_class=HTMLResponse)
+async def procedure_page():
+    return FileResponse("static/procedure.html")
+
 
 @app.get("/health")
 def health_check():
-    """Проверка статуса API"""
     return {"status": "healthy"}
+
 
 @app.get("/api-test")
 def api_test():
-    """Тестовый эндпоинт для проверки API"""
     return {"message": "API работает корректно"}
+
 
 if __name__ == "__main__":
     uvicorn.run(

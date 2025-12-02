@@ -1,221 +1,114 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление врачами (ветеринарами)</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .form-section, .list-section {
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f8f9fa;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #007bff;
-            text-decoration: none;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Врачи — VetPanel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style> body{background:#07080b;color:#eaf4ff;font-family:Inter,system-ui,Arial} .card-dark{background:#0d1117;border:1px solid rgba(255,255,255,0.04)} </style>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" class="back-link">← На главную</a>
-        <h1>Управление врачами</h1>
-
-        <div class="form-section">
-            <h2>Добавить/Обновить врача</h2>
-            <form id="doctorForm">
-                <input type="hidden" id="doctorId">
-                <div class="form-group">
-                    <label for="doctorName">ФИО врача:</label>
-                    <input type="text" id="doctorName" required>
-                </div>
-                <div class="form-group">
-                    <label for="specialization">Специализация:</label>
-                    <input type="text" id="specialization" required>
-                </div>
-                <div class="form-group">
-                    <label for="doctorPhone">Телефон:</label>
-                    <input type="text" id="doctorPhone" required>
-                </div>
-                <button type="submit">Сохранить</button>
-                <button type="button" onclick="clearForm()">Очистить</button>
-            </form>
-        </div>
-
-        <div class="list-section">
-            <h2>Список врачей</h2>
-            <table id="doctorsTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>ФИО</th>
-                        <th>Специализация</th>
-                        <th>Телефон</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="doctorsList">
-                    <!-- Данные будут загружены через JavaScript -->
-                </tbody>
-            </table>
-        </div>
+  <div class="container py-4">
+    <a href="index.html" class="btn btn-sm btn-outline-light mb-3"><i class="bi bi-arrow-left"></i> Назад</a>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="m-0">Врачи</h2>
+      <button class="btn btn-primary" onclick="openCreateDoctor()"><i class="bi bi-plus"></i> Добавить</button>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', loadDoctors);
+    <div class="card card-dark">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-dark table-hover mb-0">
+            <thead><tr><th style="width:80px">ID</th><th>ФИО</th><th>Специализация</th><th>Телефон</th><th style="width:170px">Действия</th></tr></thead>
+            <tbody id="doctorsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        document.getElementById('doctorForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            saveDoctor();
-        });
+  <!-- Modal -->
+  <div class="modal fade" id="doctorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content card-dark text-light" id="doctorForm">
+        <div class="modal-header border-0"><h5 id="doctorModalTitle">Добавить врача</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="hidden" id="doctorId">
+          <div class="mb-2"><label class="form-label">ФИО</label><input id="doctorName" class="form-control bg-transparent text-light" required></div>
+          <div class="mb-2"><label class="form-label">Специализация</label><input id="doctorSpec" class="form-control bg-transparent text-light" required></div>
+          <div class="mb-2"><label class="form-label">Телефон</label><input id="doctorPhone" class="form-control bg-transparent text-light" required></div>
+        </div>
+        <div class="modal-footer border-0"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button><button type="submit" class="btn btn-primary">Сохранить</button></div>
+      </form>
+    </div>
+  </div>
 
-        async function loadDoctors() {
-            try {
-                const response = await fetch('/doctors/');
-                const doctors = await response.json();
-                displayDoctors(doctors);
-            } catch (error) {
-                console.error('Ошибка загрузки врачей:', error);
-            }
-        }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = '/doctors/';
+const doctorsTable = document.getElementById('doctorsTable');
+const bsDoctorModal = new bootstrap.Modal(document.getElementById('doctorModal'));
 
-        function displayDoctors(doctors) {
-            const tbody = document.getElementById('doctorsList');
-            tbody.innerHTML = '';
+function esc(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;'); }
+function jsString(s){ return JSON.stringify(String(s||'')); }
 
-            doctors.forEach(doctor => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${doctor.doctor_id}</td>
-                    <td>${doctor.doctor_name}</td>
-                    <td>${doctor.specialization}</td>
-                    <td>${doctor.doctor_phone}</td>
-                    <td>
-                        <button onclick="editDoctor(${doctor.doctor_id}, '${doctor.doctor_name}', '${doctor.specialization}', '${doctor.doctor_phone}')">Редактировать</button>
-                        <button onclick="deleteDoctor(${doctor.doctor_id})">Удалить</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+function rowDoc(d){
+  return `<tr>
+    <td>${d.doctor_id}</td>
+    <td>${esc(d.doctor_name)}</td>
+    <td>${esc(d.specialization)}</td>
+    <td>${esc(d.doctor_phone)}</td>
+    <td>
+      <button class="btn btn-sm btn-outline-light me-2" onclick="openEditDoctor(${d.doctor_id}, ${jsString(d.doctor_name)}, ${jsString(d.specialization)}, ${jsString(d.doctor_phone)})"><i class="bi bi-pencil"></i> Ред.</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteDoctor(${d.doctor_id})"><i class="bi bi-trash"></i> Удалить</button>
+    </td>
+  </tr>`;
+}
 
-        async function saveDoctor() {
-            const doctorId = document.getElementById('doctorId').value;
-            const doctorData = {
-                doctor_name: document.getElementById('doctorName').value,
-                specialization: document.getElementById('specialization').value,
-                doctor_phone: document.getElementById('doctorPhone').value
-            };
+async function loadDoctors(){ try { const r=await fetch(API); const data=await r.json(); doctorsTable.innerHTML = data.map(rowDoc).join('') || '<tr><td colspan="5" class="text-muted p-3">Пусто</td></tr>'; } catch(e){ console.error(e); doctorsTable.innerHTML = '<tr><td colspan="5" class="text-muted p-3">Ошибка</td></tr>'; } }
 
-            try {
-                const url = doctorId ? `/doctors/${doctorId}` : '/doctors/';
-                const method = doctorId ? 'PUT' : 'POST';
+function openCreateDoctor(){
+  document.getElementById('doctorModalTitle').innerText = 'Добавить врача';
+  document.getElementById('doctorId').value = '';
+  document.getElementById('doctorName').value = '';
+  document.getElementById('doctorSpec').value = '';
+  document.getElementById('doctorPhone').value = '';
+  bsDoctorModal.show();
+}
 
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(doctorData)
-                });
+function openEditDoctor(id, name, spec, phone){
+  document.getElementById('doctorModalTitle').innerText = 'Редактировать #' + id;
+  document.getElementById('doctorId').value = id;
+  document.getElementById('doctorName').value = name;
+  document.getElementById('doctorSpec').value = spec;
+  document.getElementById('doctorPhone').value = phone;
+  bsDoctorModal.show();
+}
 
-                if (response.ok) {
-                    clearForm();
-                    loadDoctors();
-                }
-            } catch (error) {
-                console.error('Ошибка сохранения врача:', error);
-            }
-        }
+document.getElementById('doctorForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const id = document.getElementById('doctorId').value;
+  const payload = { doctor_name: document.getElementById('doctorName').value, specialization: document.getElementById('doctorSpec').value, doctor_phone: document.getElementById('doctorPhone').value };
+  try {
+    if (id) {
+      const put = await fetch(API + id, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (put.ok) { bsDoctorModal.hide(); loadDoctors(); return; }
+      await fetch(API + id, { method:'DELETE' });
+      await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      bsDoctorModal.hide(); loadDoctors();
+    } else {
+      const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (r.ok) { bsDoctorModal.hide(); loadDoctors(); } else alert('Ошибка');
+    }
+  } catch(e){ console.error(e); alert('Ошибка сети'); }
+});
 
-        function editDoctor(id, name, specialization, phone) {
-            document.getElementById('doctorId').value = id;
-            document.getElementById('doctorName').value = name;
-            document.getElementById('specialization').value = specialization;
-            document.getElementById('doctorPhone').value = phone;
-        }
+async function deleteDoctor(id){
+  if (!confirm('Удалить врача #' + id + '?')) return;
+  try { const r = await fetch(API + id, { method:'DELETE' }); if (r.ok) loadDoctors(); else alert('Ошибка'); } catch(e){ console.error(e); alert('Ошибка сети'); }
+}
 
-        async function deleteDoctor(id) {
-            if (confirm('Вы уверены, что хотите удалить этого врача?')) {
-                try {
-                    const response = await fetch(`/doctors/${id}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        loadDoctors();
-                    }
-                } catch (error) {
-                    console.error('Ошибка удаления врача:', error);
-                }
-            }
-        }
-
-        function clearForm() {
-            document.getElementById('doctorForm').reset();
-            document.getElementById('doctorId').value = '';
-        }
-    </script>
+loadDoctors();
+</script>
 </body>
 </html>

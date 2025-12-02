@@ -1,304 +1,166 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление процедурами</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .form-section, .list-section {
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f8f9fa;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #007bff;
-            text-decoration: none;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-    </style>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Процедуры — VetPanel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style> body{background:#07080b;color:#eaf4ff;font-family:Inter,system-ui,Arial} .card-dark{background:#0d1117;border:1px solid rgba(255,255,255,0.04)} </style>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" class="back-link">← На главную</a>
-        <h1>Управление процедурами</h1>
-
-        <div class="form-section">
-            <h2>Добавить/Обновить процедуру</h2>
-            <form id="procedureForm">
-                <input type="hidden" id="procedureId">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="clientId">Клиент:</label>
-                        <select id="clientId" required>
-                            <option value="">Выберите клиента</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="animalId">Животное:</label>
-                        <select id="animalId" required>
-                            <option value="">Выберите животное</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="doctorId">Врач:</label>
-                        <select id="doctorId" required>
-                            <option value="">Выберите врача</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="treatmentId">Вид лечения:</label>
-                        <select id="treatmentId" required>
-                            <option value="">Выберите лечение</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit">Сохранить</button>
-                <button type="button" onclick="clearForm()">Очистить</button>
-            </form>
-        </div>
-
-        <div class="list-section">
-            <h2>Список процедур</h2>
-            <table id="proceduresTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Клиент</th>
-                        <th>Животное</th>
-                        <th>Врач</th>
-                        <th>Лечение</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="proceduresList">
-                    <!-- Данные будут загружены через JavaScript -->
-                </tbody>
-            </table>
-        </div>
+  <div class="container py-4">
+    <a href="index.html" class="btn btn-sm btn-outline-light mb-3"><i class="bi bi-arrow-left"></i> Назад</a>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Процедуры</h2>
+      <button class="btn btn-primary" onclick="openCreateProcedure()"><i class="bi bi-plus"></i> Добавить</button>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProcedures();
-            loadReferenceData();
-        });
+    <div class="card card-dark">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-dark table-hover mb-0">
+            <thead><tr><th style="width:70px">ID</th><th>Клиент</th><th>Животное</th><th>Врач</th><th style="width:170px">Действия</th></tr></thead>
+            <tbody id="proceduresTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        document.getElementById('procedureForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            saveProcedure();
-        });
+  <!-- Modal -->
+  <div class="modal fade" id="procedureModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content card-dark text-light" id="procedureForm">
+        <div class="modal-header border-0"><h5 id="procedureModalTitle">Добавить процедуру</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="hidden" id="procedureId">
+          <div class="mb-2">
+            <label class="form-label">Клиент</label>
+            <select id="procClient" class="form-select bg-transparent text-light" required></select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Животное</label>
+            <select id="procAnimal" class="form-select bg-transparent text-light" required></select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Врач</label>
+            <select id="procDoctor" class="form-select bg-transparent text-light" required></select>
+          </div>
+          <div class="small muted">Замечание: текущая серверная модель `Procedure` не содержит `treatment`.</div>
+        </div>
+        <div class="modal-footer border-0"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button><button type="submit" class="btn btn-primary">Сохранить</button></div>
+      </form>
+    </div>
+  </div>
 
-        async function loadReferenceData() {
-            try {
-                // Загрузка клиентов
-                const clientsResponse = await fetch('/clients/');
-                const clients = await clientsResponse.json();
-                const clientSelect = document.getElementById('clientId');
-                clients.forEach(client => {
-                    const option = document.createElement('option');
-                    option.value = client.client_id;
-                    option.textContent = `${client.client_name} (${client.client_phone})`;
-                    clientSelect.appendChild(option);
-                });
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = '/procedures/';
+const clientsAPI = '/clients/';
+const animalsAPI = '/animals/';
+const doctorsAPI = '/doctors/';
 
-                // Загрузка животных
-                const animalsResponse = await fetch('/animals/');
-                const animals = await animalsResponse.json();
-                const animalSelect = document.getElementById('animalId');
-                animals.forEach(animal => {
-                    const option = document.createElement('option');
-                    option.value = animal.animal_id;
-                    option.textContent = `${animal.name} (${animal.animal_type})`;
-                    animalSelect.appendChild(option);
-                });
+const proceduresTable = document.getElementById('proceduresTable');
+const bsProcedureModal = new bootstrap.Modal(document.getElementById('procedureModal'));
 
-                // Загрузка врачей
-                const doctorsResponse = await fetch('/doctors/');
-                const doctors = await doctorsResponse.json();
-                const doctorSelect = document.getElementById('doctorId');
-                doctors.forEach(doctor => {
-                    const option = document.createElement('option');
-                    option.value = doctor.doctor_id;
-                    option.textContent = `${doctor.doctor_name} (${doctor.specialization})`;
-                    doctorSelect.appendChild(option);
-                });
+function esc(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;'); }
+function jsString(s){ return JSON.stringify(String(s||'')); }
 
-                // Загрузка видов лечения
-                const treatmentsResponse = await fetch('/treatments/');
-                const treatments = await treatmentsResponse.json();
-                const treatmentSelect = document.getElementById('treatmentId');
-                treatments.forEach(treatment => {
-                    const option = document.createElement('option');
-                    option.value = treatment.treatment_id;
-                    option.textContent = treatment.treatment_name;
-                    treatmentSelect.appendChild(option);
-                });
+async function loadReferenceData(){
+  // clients
+  try {
+    const [cR,aR,dR] = await Promise.all([fetch(clientsAPI), fetch(animalsAPI), fetch(doctorsAPI)]);
+    const clients = await cR.json();
+    const animals = await aR.json();
+    const doctors = await dR.json();
 
-            } catch (error) {
-                console.error('Ошибка загрузки справочных данных:', error);
-            }
-        }
+    const clientEl = document.getElementById('procClient');
+    clientEl.innerHTML = '<option value="">Выберите клиента</option>';
+    clients.forEach(c => clientEl.insertAdjacentHTML('beforeend', `<option value="${c.client_id}" data-name="${escapeHtml(c.client_name)}">${escapeHtml(c.client_name)} (${escapeHtml(c.client_phone)})</option>`));
 
-        async function loadProcedures() {
-            try {
-                const response = await fetch('/procedures/');
-                const procedures = await response.json();
-                displayProcedures(procedures);
-            } catch (error) {
-                console.error('Ошибка загрузки процедур:', error);
-            }
-        }
+    const animalEl = document.getElementById('procAnimal');
+    animalEl.innerHTML = '<option value="">Выберите животное</option>';
+    animals.forEach(a => animalEl.insertAdjacentHTML('beforeend', `<option value="${a.animal_id}" data-name="${escapeHtml(a.name)}">${escapeHtml(a.name)} — ${escapeHtml(a.animal_type)}</option>`));
 
-        function displayProcedures(procedures) {
-            const tbody = document.getElementById('proceduresList');
-            tbody.innerHTML = '';
+    const docEl = document.getElementById('procDoctor');
+    docEl.innerHTML = '<option value="">Выберите врача</option>';
+    doctors.forEach(d => docEl.insertAdjacentHTML('beforeend', `<option value="${d.doctor_id}" data-name="${escapeHtml(d.doctor_name)}">${escapeHtml(d.doctor_name)} — ${escapeHtml(d.specialization)}</option>`));
+  } catch (e) { console.error('loadReferenceData', e); }
+}
 
-            procedures.forEach(procedure => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${procedure.procedure_id}</td>
-                    <td>${procedure.client_name}</td>
-                    <td>${procedure.animal_name}</td>
-                    <td>${procedure.doctor_name}</td>
-                    <td>${procedure.treatment_name}</td>
-                    <td>
-                        <button onclick="editProcedure(${procedure.procedure_id}, ${procedure.client_id}, ${procedure.animal_id}, ${procedure.doctor_id}, ${procedure.treatment_id})">Редактировать</button>
-                        <button onclick="deleteProcedure(${procedure.procedure_id})">Удалить</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+async function loadProcedures(){
+  try {
+    const r = await fetch(API);
+    const data = await r.json();
+    proceduresTable.innerHTML = data.map(p => `<tr>
+      <td>${p.procedure_id}</td>
+      <td>${esc(p.client_name)}</td>
+      <td>${esc(p.animal_name)}</td>
+      <td>${esc(p.doctor_name)}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-light me-2" onclick="openEditProcedure(${p.procedure_id}, ${p.client_id}, ${p.animal_id}, ${p.doctor_id})"><i class="bi bi-pencil"></i> Ред.</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteProcedure(${p.procedure_id})"><i class="bi bi-trash"></i> Удалить</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5" class="text-muted p-3">Пусто</td></tr>';
+  } catch(e){ console.error(e); proceduresTable.innerHTML = '<tr><td colspan="5" class="text-muted p-3">Ошибка загрузки</td></tr>'; }
+}
 
-        async function saveProcedure() {
-            const procedureId = document.getElementById('procedureId').value;
-            const procedureData = {
-                client_id: parseInt(document.getElementById('clientId').value),
-                client_name: document.getElementById('clientId').selectedOptions[0].text.split(' (')[0],
-                animal_id: parseInt(document.getElementById('animalId').value),
-                animal_name: document.getElementById('animalId').selectedOptions[0].text.split(' (')[0],
-                doctor_id: parseInt(document.getElementById('doctorId').value),
-                doctor_name: document.getElementById('doctorId').selectedOptions[0].text.split(' (')[0],
-                treatment_id: parseInt(document.getElementById('treatmentId').value),
-                treatment_name: document.getElementById('treatmentId').selectedOptions[0].text
-            };
+function openCreateProcedure(){
+  document.getElementById('procedureModalTitle').innerText = 'Добавить процедуру';
+  document.getElementById('procedureId').value = '';
+  document.getElementById('procClient').value = '';
+  document.getElementById('procAnimal').value = '';
+  document.getElementById('procDoctor').value = '';
+  bsProcedureModal.show();
+}
 
-            try {
-                const url = procedureId ? `/procedures/${procedureId}` : '/procedures/';
-                const method = procedureId ? 'PUT' : 'POST';
+function openEditProcedure(id, clientId, animalId, doctorId){
+  document.getElementById('procedureModalTitle').innerText = 'Редактировать #' + id;
+  document.getElementById('procedureId').value = id;
+  document.getElementById('procClient').value = clientId;
+  document.getElementById('procAnimal').value = animalId;
+  document.getElementById('procDoctor').value = doctorId;
+  bsProcedureModal.show();
+}
 
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(procedureData)
-                });
+document.getElementById('procedureForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const id = document.getElementById('procedureId').value;
+  const client_id = parseInt(document.getElementById('procClient').value);
+  const animal_id = parseInt(document.getElementById('procAnimal').value);
+  const doctor_id = parseInt(document.getElementById('procDoctor').value);
 
-                if (response.ok) {
-                    clearForm();
-                    loadProcedures();
-                }
-            } catch (error) {
-                console.error('Ошибка сохранения процедуры:', error);
-            }
-        }
+  if (!client_id || !animal_id || !doctor_id) { alert('Выберите клиента, животное и врача'); return; }
 
-        function editProcedure(id, clientId, animalId, doctorId, treatmentId) {
-            document.getElementById('procedureId').value = id;
-            document.getElementById('clientId').value = clientId;
-            document.getElementById('animalId').value = animalId;
-            document.getElementById('doctorId').value = doctorId;
-            document.getElementById('treatmentId').value = treatmentId;
-        }
+  const client_name = document.getElementById('procClient').selectedOptions[0].dataset.name;
+  const animal_name = document.getElementById('procAnimal').selectedOptions[0].dataset.name;
+  const doctor_name = document.getElementById('procDoctor').selectedOptions[0].dataset.name;
 
-        async function deleteProcedure(id) {
-            if (confirm('Вы уверены, что хотите удалить эту процедуру?')) {
-                try {
-                    const response = await fetch(`/procedures/${id}`, {
-                        method: 'DELETE'
-                    });
+  const payload = { client_id, client_name, animal_id, animal_name, doctor_id, doctor_name };
 
-                    if (response.ok) {
-                        loadProcedures();
-                    }
-                } catch (error) {
-                    console.error('Ошибка удаления процедуры:', error);
-                }
-            }
-        }
+  try {
+    if (id) {
+      const put = await fetch(API + id, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (put.ok){ bsProcedureModal.hide(); loadProcedures(); return; }
+      // fallback
+      await fetch(API + id, { method:'DELETE' });
+      await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      bsProcedureModal.hide(); loadProcedures();
+    } else {
+      const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (r.ok){ bsProcedureModal.hide(); loadProcedures(); } else { alert('Ошибка создания'); }
+    }
+  } catch(e){ console.error(e); alert('Ошибка сети'); }
+});
 
-        function clearForm() {
-            document.getElementById('procedureForm').reset();
-            document.getElementById('procedureId').value = '';
-        }
-    </script>
+async function deleteProcedure(id){
+  if(!confirm('Удалить процедуру #' + id + '?')) return;
+  try { const r = await fetch(API + id, { method:'DELETE' }); if (r.ok) loadProcedures(); else alert('Ошибка'); } catch(e){ console.error(e); alert('Ошибка сети'); }
+}
+
+function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+(async function init(){ await loadReferenceData(); await loadProcedures(); })();
+</script>
 </body>
 </html>

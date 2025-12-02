@@ -1,215 +1,170 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление клиентами</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .form-section, .list-section {
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f8f9fa;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #007bff;
-            text-decoration: none;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Клиенты — VetPanel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background:#07080b; color:#eaf4ff; font-family: Inter, system-ui, Arial; }
+    .card-dark { background:#0d1117; border:1px solid rgba(255,255,255,0.04); }
+    .muted { color:#9aa4b2; }
+    .accent { color:#7ab7ff; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" class="back-link">← На главную</a>
-        <h1>Управление клиентами</h1>
+  <div class="container py-4">
+    <a href="index.html" class="btn btn-sm btn-outline-light mb-3"><i class="bi bi-arrow-left"></i> Назад</a>
 
-        <div class="form-section">
-            <h2>Добавить/Обновить клиента</h2>
-            <form id="clientForm">
-                <input type="hidden" id="clientId">
-                <div class="form-group">
-                    <label for="clientName">Имя клиента:</label>
-                    <input type="text" id="clientName" required>
-                </div>
-                <div class="form-group">
-                    <label for="clientPhone">Телефон:</label>
-                    <input type="text" id="clientPhone" required>
-                </div>
-                <button type="submit">Сохранить</button>
-                <button type="button" onclick="clearForm()">Очистить</button>
-            </form>
-        </div>
-
-        <div class="list-section">
-            <h2>Список клиентов</h2>
-            <table id="clientsTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Имя</th>
-                        <th>Телефон</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="clientsList">
-                    <!-- Данные будут загружены через JavaScript -->
-                </tbody>
-            </table>
-        </div>
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h2 class="m-0">Клиенты</h2>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal" onclick="openCreateClient()">
+        <i class="bi bi-plus-lg me-1"></i> Добавить
+      </button>
     </div>
 
-    <script>
-        // Загрузка клиентов при загрузке страницы
-        document.addEventListener('DOMContentLoaded', loadClients);
+    <div class="card card-dark shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-dark table-hover mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th style="width:80px">ID</th>
+                <th>Имя</th>
+                <th>Телефон</th>
+                <th style="width:170px">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="clientsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        // Обработчик формы
-        document.getElementById('clientForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            saveClient();
-        });
+  <!-- Modal: Create/Edit Client -->
+  <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content bg-dark text-light card-dark" id="clientForm">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="clientModalTitle">Добавить клиента</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="clientId">
+          <div class="mb-3">
+            <label class="form-label">Имя</label>
+            <input id="clientName" class="form-control bg-transparent text-light" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Телефон</label>
+            <input id="clientPhone" class="form-control bg-transparent text-light" required>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary" id="clientSaveBtn">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-        async function loadClients() {
-            try {
-                const response = await fetch('/clients/');
-                const clients = await response.json();
-                displayClients(clients);
-            } catch (error) {
-                console.error('Ошибка загрузки клиентов:', error);
-            }
-        }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = '/clients/';
+const clientsTable = document.getElementById('clientsTable');
+const bsClientModal = new bootstrap.Modal(document.getElementById('clientModal'));
 
-        function displayClients(clients) {
-            const tbody = document.getElementById('clientsList');
-            tbody.innerHTML = '';
+async function loadClients(){
+  try {
+    const r = await fetch(API);
+    const data = await r.json();
+    clientsTable.innerHTML = data.map(c => rowHTML(c)).join('');
+  } catch(e){
+    console.error('loadClients', e);
+    clientsTable.innerHTML = `<tr><td colspan="4" class="text-muted p-3">Ошибка загрузки</td></tr>`;
+  }
+}
 
-            clients.forEach(client => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${client.client_id}</td>
-                    <td>${client.client_name}</td>
-                    <td>${client.client_phone}</td>
-                    <td>
-                        <button onclick="editClient(${client.client_id}, '${client.client_name}', '${client.client_phone}')">Редактировать</button>
-                        <button onclick="deleteClient(${client.client_id})">Удалить</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+function rowHTML(c){
+  return `<tr>
+    <td class="align-middle">${c.client_id}</td>
+    <td class="align-middle">${escapeHtml(c.client_name)}</td>
+    <td class="align-middle">${escapeHtml(c.client_phone)}</td>
+    <td class="align-middle">
+      <button class="btn btn-sm btn-outline-light me-2" onclick="openEditClient(${c.client_id}, ${jsString(c.client_name)}, ${jsString(c.client_phone)})">
+        <i class="bi bi-pencil"></i> Ред.
+      </button>
+      <button class="btn btn-sm btn-danger" onclick="deleteClient(${c.client_id})">
+        <i class="bi bi-trash"></i> Удалить
+      </button>
+    </td>
+  </tr>`;
+}
 
-        async function saveClient() {
-            const clientId = document.getElementById('clientId').value;
-            const clientData = {
-                client_name: document.getElementById('clientName').value,
-                client_phone: document.getElementById('clientPhone').value
-            };
+function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function jsString(s){ return JSON.stringify(String(s||'')); }
 
-            try {
-                const url = clientId ? `/clients/${clientId}` : '/clients/';
-                const method = clientId ? 'PUT' : 'POST';
+async function deleteClient(id){
+  if(!confirm('Удалить клиента #' + id + '?')) return;
+  try {
+    const r = await fetch(API + id, { method: 'DELETE' });
+    if(r.ok) loadClients(); else alert('Ошибка удаления');
+  } catch(e){ console.error(e); alert('Ошибка сети'); }
+}
 
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(clientData)
-                });
+function openCreateClient(){
+  document.getElementById('clientModalTitle').innerText = 'Добавить клиента';
+  document.getElementById('clientId').value = '';
+  document.getElementById('clientName').value = '';
+  document.getElementById('clientPhone').value = '';
+  bsClientModal.show();
+}
 
-                if (response.ok) {
-                    clearForm();
-                    loadClients();
-                }
-            } catch (error) {
-                console.error('Ошибка сохранения клиента:', error);
-            }
-        }
+function openEditClient(id, name, phone){
+  document.getElementById('clientModalTitle').innerText = 'Редактировать клиента #' + id;
+  document.getElementById('clientId').value = id;
+  document.getElementById('clientName').value = name;
+  document.getElementById('clientPhone').value = phone;
+  bsClientModal.show();
+}
 
-        function editClient(id, name, phone) {
-            document.getElementById('clientId').value = id;
-            document.getElementById('clientName').value = name;
-            document.getElementById('clientPhone').value = phone;
-        }
+document.getElementById('clientForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('clientId').value;
+  const payload = {
+    client_name: document.getElementById('clientName').value,
+    client_phone: document.getElementById('clientPhone').value
+  };
 
-        async function deleteClient(id) {
-            if (confirm('Вы уверены, что хотите удалить этого клиента?')) {
-                try {
-                    const response = await fetch(`/clients/${id}`, {
-                        method: 'DELETE'
-                    });
+  try {
+    if (id) {
+      // Try PUT first; fallback to DELETE+POST if not supported
+      const put = await fetch(API + id, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if (put.ok) {
+        bsClientModal.hide(); loadClients(); return;
+      } else {
+        console.warn('PUT failed, status', put.status, '-> fallback to delete+post');
+        // fallback
+        await fetch(API + id, { method: 'DELETE' });
+        await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+        bsClientModal.hide(); loadClients(); return;
+      }
+    } else {
+      const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      if (r.ok) { bsClientModal.hide(); loadClients(); }
+      else { alert('Ошибка создания'); }
+    }
+  } catch(err){
+    console.error(err); alert('Ошибка сети или сервера');
+  }
+});
 
-                    if (response.ok) {
-                        loadClients();
-                    }
-                } catch (error) {
-                    console.error('Ошибка удаления клиента:', error);
-                }
-            }
-        }
-
-        function clearForm() {
-            document.getElementById('clientForm').reset();
-            document.getElementById('clientId').value = '';
-        }
-    </script>
+loadClients();
+</script>
 </body>
 </html>

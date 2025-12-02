@@ -1,205 +1,85 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление видами лечения</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .form-section, .list-section {
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f8f9fa;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #007bff;
-            text-decoration: none;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Виды лечения — VetPanel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style> body{background:#07080b;color:#eaf4ff;font-family:Inter,system-ui,Arial} .card-dark{background:#0d1117;border:1px solid rgba(255,255,255,0.04)} </style>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" class="back-link">← На главную</a>
-        <h1>Управление видами лечения</h1>
-
-        <div class="form-section">
-            <h2>Добавить/Обновить вид лечения</h2>
-            <form id="treatmentForm">
-                <input type="hidden" id="treatmentId">
-                <div class="form-group">
-                    <label for="treatmentName">Название лечения:</label>
-                    <input type="text" id="treatmentName" required>
-                </div>
-                <button type="submit">Сохранить</button>
-                <button type="button" onclick="clearForm()">Очистить</button>
-            </form>
-        </div>
-
-        <div class="list-section">
-            <h2>Список видов лечения</h2>
-            <table id="treatmentsTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Название лечения</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="treatmentsList">
-                    <!-- Данные будут загружены через JavaScript -->
-                </tbody>
-            </table>
-        </div>
+  <div class="container py-4">
+    <a href="index.html" class="btn btn-sm btn-outline-light mb-3"><i class="bi bi-arrow-left"></i> Назад</a>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Виды лечения</h2>
+      <button class="btn btn-primary" onclick="openCreateTreatment()"><i class="bi bi-plus"></i> Добавить</button>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', loadTreatments);
+    <div class="card card-dark">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-dark mb-0">
+            <thead><tr><th style="width:70px">ID</th><th>Название</th><th style="width:150px">Действия</th></tr></thead>
+            <tbody id="treatmentsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        document.getElementById('treatmentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            saveTreatment();
-        });
+  <!-- Modal -->
+  <div class="modal fade" id="treatmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content card-dark text-light" id="treatmentForm">
+        <div class="modal-header border-0"><h5 id="treatmentModalTitle">Добавить лечение</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="hidden" id="treatmentId">
+          <div class="mb-2"><label class="form-label">Название</label><input id="treatmentName" class="form-control bg-transparent text-light" required></div>
+        </div>
+        <div class="modal-footer border-0"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button><button type="submit" class="btn btn-primary">Сохранить</button></div>
+      </form>
+    </div>
+  </div>
 
-        async function loadTreatments() {
-            try {
-                const response = await fetch('/treatments/');
-                const treatments = await response.json();
-                displayTreatments(treatments);
-            } catch (error) {
-                console.error('Ошибка загрузки видов лечения:', error);
-            }
-        }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = '/treatments/';
+const treatmentsTable = document.getElementById('treatmentsTable');
+const bsTreatmentModal = new bootstrap.Modal(document.getElementById('treatmentModal'));
 
-        function displayTreatments(treatments) {
-            const tbody = document.getElementById('treatmentsList');
-            tbody.innerHTML = '';
+function esc(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;'); }
 
-            treatments.forEach(treatment => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${treatment.treatment_id}</td>
-                    <td>${treatment.treatment_name}</td>
-                    <td>
-                        <button onclick="editTreatment(${treatment.treatment_id}, '${treatment.treatment_name}')">Редактировать</button>
-                        <button onclick="deleteTreatment(${treatment.treatment_id})">Удалить</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+function rowTreat(t){ return `<tr><td>${t.treatment_id}</td><td>${esc(t.treatment_name)}</td><td><button class="btn btn-sm btn-outline-light me-2" onclick="openEditTreatment(${t.treatment_id}, ${JSON.stringify(t.treatment_name)})"><i class="bi bi-pencil"></i> Ред.</button><button class="btn btn-sm btn-danger" onclick="deleteTreatment(${t.treatment_id})"><i class="bi bi-trash"></i> Удалить</button></td></tr>`; }
 
-        async function saveTreatment() {
-            const treatmentId = document.getElementById('treatmentId').value;
-            const treatmentData = {
-                treatment_name: document.getElementById('treatmentName').value
-            };
+async function loadTreatments(){ try { const r=await fetch(API); const data=await r.json(); treatmentsTable.innerHTML = data.map(rowTreat).join('') || '<tr><td colspan="3" class="text-muted p-3">Пусто</td></tr>'; } catch(e){ console.error(e); treatmentsTable.innerHTML = '<tr><td colspan="3" class="text-muted p-3">Ошибка</td></tr>'; } }
 
-            try {
-                const url = treatmentId ? `/treatments/${treatmentId}` : '/treatments/';
-                const method = treatmentId ? 'PUT' : 'POST';
+function openCreateTreatment(){ document.getElementById('treatmentModalTitle').innerText='Добавить лечение'; document.getElementById('treatmentId').value=''; document.getElementById('treatmentName').value=''; bsTreatmentModal.show(); }
+function openEditTreatment(id, name){ document.getElementById('treatmentModalTitle').innerText='Редактировать #'+id; document.getElementById('treatmentId').value=id; document.getElementById('treatmentName').value=name; bsTreatmentModal.show(); }
 
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(treatmentData)
-                });
+document.getElementById('treatmentForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const id=document.getElementById('treatmentId').value;
+  const payload={ treatment_name: document.getElementById('treatmentName').value };
+  try {
+    if (id) {
+      const put = await fetch(API + id, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (put.ok){ bsTreatmentModal.hide(); loadTreatments(); return; }
+      await fetch(API + id, { method:'DELETE' });
+      await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      bsTreatmentModal.hide(); loadTreatments();
+    } else {
+      const r=await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (r.ok){ bsTreatmentModal.hide(); loadTreatments(); } else alert('Ошибка создания');
+    }
+  } catch(e){ console.error(e); alert('Ошибка'); }
+});
 
-                if (response.ok) {
-                    clearForm();
-                    loadTreatments();
-                }
-            } catch (error) {
-                console.error('Ошибка сохранения вида лечения:', error);
-            }
-        }
+async function deleteTreatment(id){
+  if (!confirm('Удалить лечение #' + id + '?')) return;
+  try { const r=await fetch(API+id, { method:'DELETE' }); if(r.ok) loadTreatments(); else alert('Ошибка'); } catch(e){ console.error(e); alert('Ошибка сети'); }
+}
 
-        function editTreatment(id, name) {
-            document.getElementById('treatmentId').value = id;
-            document.getElementById('treatmentName').value = name;
-        }
-
-        async function deleteTreatment(id) {
-            if (confirm('Вы уверены, что хотите удалить этот вид лечения?')) {
-                try {
-                    const response = await fetch(`/treatments/${id}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        loadTreatments();
-                    }
-                } catch (error) {
-                    console.error('Ошибка удаления вида лечения:', error);
-                }
-            }
-        }
-
-        function clearForm() {
-            document.getElementById('treatmentForm').reset();
-            document.getElementById('treatmentId').value = '';
-        }
-    </script>
+loadTreatments();
+</script>
 </body>
 </html>
