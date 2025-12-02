@@ -24,18 +24,8 @@ class TestClients:
         
     def test_add_client(self, driver, base_url, server_process):
         """Тест добавления нового клиента"""
-        # Проверяем что сервер доступен
-        import urllib.request
-        try:
-            urllib.request.urlopen(f"{base_url}/health", timeout=2)
-        except:
-            pytest.fail("Сервер не доступен. Убедитесь что сервер запущен.")
-        
-        # Загружаем страницу с обработкой таймаутов
-        try:
-            driver.get(f"{base_url}/client")
-        except Exception as e:
-            pytest.fail(f"Не удалось загрузить страницу: {e}")
+        # server_process фикстура гарантирует что сервер запущен
+        driver.get(f"{base_url}/client")
         
         # Ждем загрузки страницы и JavaScript
         WebDriverWait(driver, 15).until(
@@ -116,18 +106,8 @@ class TestClients:
         
     def test_view_clients_table(self, driver, base_url, server_process):
         """Тест просмотра таблицы клиентов"""
-        # Проверяем что сервер доступен перед загрузкой страницы
-        import urllib.request
-        try:
-            urllib.request.urlopen(f"{base_url}/health", timeout=2)
-        except:
-            pytest.fail("Сервер не доступен. Убедитесь что сервер запущен.")
-        
-        # Загружаем страницу с обработкой таймаутов
-        try:
-            driver.get(f"{base_url}/client")
-        except Exception as e:
-            pytest.fail(f"Не удалось загрузить страницу: {e}")
+        # server_process фикстура гарантирует что сервер запущен
+        driver.get(f"{base_url}/client")
         
         # Ждем загрузки страницы
         WebDriverWait(driver, 15).until(

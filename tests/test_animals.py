@@ -13,18 +13,8 @@ class TestAnimals:
     
     def test_open_animals_page(self, driver, base_url, server_process):
         """Тест открытия страницы животных"""
-        # Проверяем что сервер доступен
-        import urllib.request
-        try:
-            urllib.request.urlopen(f"{base_url}/health", timeout=2)
-        except:
-            pytest.fail("Сервер не доступен. Убедитесь что сервер запущен.")
-        
-        # Загружаем страницу с обработкой таймаутов
-        try:
-            driver.get(f"{base_url}/animal")
-        except Exception as e:
-            pytest.fail(f"Не удалось загрузить страницу: {e}")
+        # server_process фикстура гарантирует что сервер запущен
+        driver.get(f"{base_url}/animal")
         
         # Проверяем заголовок страницы
         title = WebDriverWait(driver, 10).until(
@@ -34,18 +24,8 @@ class TestAnimals:
         
     def test_add_animal(self, driver, base_url, server_process):
         """Тест добавления нового животного"""
-        # Проверяем что сервер доступен
-        import urllib.request
-        try:
-            urllib.request.urlopen(f"{base_url}/health", timeout=2)
-        except:
-            pytest.fail("Сервер не доступен. Убедитесь что сервер запущен.")
-        
-        # Загружаем страницу с обработкой таймаутов
-        try:
-            driver.get(f"{base_url}/animal")
-        except Exception as e:
-            pytest.fail(f"Не удалось загрузить страницу: {e}")
+        # server_process фикстура гарантирует что сервер запущен
+        driver.get(f"{base_url}/animal")
         
         # Ждем загрузки страницы и JavaScript
         WebDriverWait(driver, 15).until(
@@ -118,18 +98,8 @@ class TestAnimals:
         
     def test_refresh_button(self, driver, base_url, server_process):
         """Тест кнопки обновления"""
-        # Проверяем что сервер доступен
-        import urllib.request
-        try:
-            urllib.request.urlopen(f"{base_url}/health", timeout=2)
-        except:
-            pytest.fail("Сервер не доступен. Убедитесь что сервер запущен.")
-        
-        # Загружаем страницу с обработкой таймаутов
-        try:
-            driver.get(f"{base_url}/animal")
-        except Exception as e:
-            pytest.fail(f"Не удалось загрузить страницу: {e}")
+        # server_process фикстура гарантирует что сервер запущен
+        driver.get(f"{base_url}/animal")
         
         # Ждем загрузки
         WebDriverWait(driver, 10).until(

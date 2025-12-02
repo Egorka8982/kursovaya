@@ -13,18 +13,8 @@ class TestMainPage:
     
     def test_open_main_page(self, driver, base_url, server_process):
         """Тест открытия главной страницы"""
-        # Проверяем что сервер доступен
-        import urllib.request
-        try:
-            urllib.request.urlopen(f"{base_url}/health", timeout=2)
-        except:
-            pytest.fail("Сервер не доступен. Убедитесь что сервер запущен.")
-        
-        # Загружаем страницу с обработкой таймаутов
-        try:
-            driver.get(base_url)
-        except Exception as e:
-            pytest.fail(f"Не удалось загрузить страницу: {e}")
+        # server_process фикстура гарантирует что сервер запущен
+        driver.get(base_url)
         
         # Ждем загрузки страницы
         WebDriverWait(driver, 20).until(
@@ -46,18 +36,8 @@ class TestMainPage:
         
     def test_navigation_links(self, driver, base_url, server_process):
         """Тест навигационных ссылок"""
-        # Проверяем что сервер доступен
-        import urllib.request
-        try:
-            urllib.request.urlopen(f"{base_url}/health", timeout=2)
-        except:
-            pytest.fail("Сервер не доступен. Убедитесь что сервер запущен.")
-        
-        # Загружаем страницу с обработкой таймаутов
-        try:
-            driver.get(base_url)
-        except Exception as e:
-            pytest.fail(f"Не удалось загрузить страницу: {e}")
+        # server_process фикстура гарантирует что сервер запущен
+        driver.get(base_url)
         
         # Ждем загрузки страницы
         WebDriverWait(driver, 20).until(
@@ -79,18 +59,8 @@ class TestMainPage:
         
     def test_navigate_to_clients(self, driver, base_url, server_process):
         """Тест перехода на страницу клиентов"""
-        # Проверяем что сервер доступен
-        import urllib.request
-        try:
-            urllib.request.urlopen(f"{base_url}/health", timeout=2)
-        except:
-            pytest.fail("Сервер не доступен. Убедитесь что сервер запущен.")
-        
-        # Загружаем страницу с обработкой таймаутов
-        try:
-            driver.get(base_url)
-        except Exception as e:
-            pytest.fail(f"Не удалось загрузить страницу: {e}")
+        # server_process фикстура гарантирует что сервер запущен
+        driver.get(base_url)
         
         # Ждем загрузки страницы
         WebDriverWait(driver, 20).until(

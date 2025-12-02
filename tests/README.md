@@ -88,6 +88,42 @@ def test_my_feature(driver, base_url, server_process):
 
 ## Решение проблем
 
+### ERROR vs FAILED
+
+- **ERROR** - тест упал до выполнения (проблема в фикстурах, setup, импортах)
+- **FAILED** - тест выполнился, но assertion не прошел
+
+Если видите ERROR, скорее всего проблема в:
+1. Фикстуре `server_process` - сервер не запускается
+2. Фикстуре `driver` - ChromeDriver не создается
+3. Импортах или синтаксических ошибках
+
+### Тесты падают с ERROR (сервер не запускается)
+
+**Диагностика:**
+1. Запустите скрипт отладки:
+```bash
+python tests/debug_server.py
+```
+
+2. Проверьте что сервер запускается вручную:
+```bash
+python main.py
+```
+
+3. Проверьте что порт свободен:
+```bash
+# Windows
+netstat -ano | findstr :8007
+# Linux/Mac
+lsof -i :8007
+```
+
+**Решение:**
+- Убедитесь что все зависимости установлены: `pip install -r requirements.txt`
+- Закройте другие приложения на порту 8007
+- Проверьте что виртуальное окружение активировано
+
 ### Тесты падают с TimeoutException
 
 - Увеличьте таймауты в тестах (сейчас 15 секунд)
@@ -98,4 +134,5 @@ def test_my_feature(driver, base_url, server_process):
 
 - Проверьте интернет-соединение
 - Убедитесь, что `webdriver-manager` установлен: `pip install webdriver-manager`
+- Убедитесь, что Google Chrome установлен
 
